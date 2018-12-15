@@ -14,7 +14,6 @@ public class Fruit extends element{
 		this.weight = fruit.weight;
 	}
 	
-	
 	public String toString()
 	{
 		return super.Type+","+super.id+","+super.lat+","+super.lon+","+super.alt+","+this.weight+",";

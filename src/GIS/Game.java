@@ -7,18 +7,26 @@ import java.util.ArrayList;
 
 import File_format.CsvArrayList;
 
-public class Game extends CsvArrayList{
+public class Game {
 
+	CsvArrayList cal;
 	ArrayList<Packmen> packmens;
 	ArrayList<Fruit> fruits;
 	
 	public Game(String csvFileName) {
-		super(csvFileName);
+		cal = new CsvArrayList(csvFileName); 
 		packmens = new ArrayList<Packmen>();
 		fruits = new ArrayList<Fruit>(); 
-		createCollections(super.getLines());
+		createCollections(cal.getLines());
 	}
 
+	public Game(ArrayList<Packmen> packmens, ArrayList<Fruit> fruits)
+	{
+		this.packmens = packmens;
+		this.fruits = 	fruits;	
+		createCsv();
+	}
+	
 	public void createCsv()
 	{
 		String fileName = "output.csv";
