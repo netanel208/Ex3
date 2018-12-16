@@ -1,30 +1,65 @@
 package Paths;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import Coords.MyCoords;
 import GIS.Fruit;
+import GIS.Packmen;
 import Geom.Point3D;
 
 public class Path extends LinkedList<Point3D>{
 
-	double length = 0;
-//	LinkedList<Point3D> path;
+	double lengthOfPath;
+	ArrayList<Double> times;
+	
 
-//	public Path()
-//	{
-//		= new LinkedList<Point3D>();
-//	}
+	public Path()
+	{
+		this.lengthOfPath=0;
+		this.times = new ArrayList<Double>();
+	}
 
 	public double getLength()
 	{
 		MyCoords c = new MyCoords();
 		for(int i=0 ; i<this.size()-1 ; i++)
 		{
-			length += c.distance3d(this.get(i), this.get(i+1));
+			lengthOfPath += c.distance3d(this.get(i), this.get(i+1));
 		}
-		return length;
+		return lengthOfPath;
 	}
+	
+	public Point3D getPointInTime(double time) {
+		Point3D p = null;
+		if (this.getTime().get(0) > time )
+			return this.get(0);
+		
+		if (this.getTime().get(this.size()-1) < time )
+			return this.get(size()-1);
+		
+		// find the 2 point that the time betwen them 
+		for (int i = 0; i < this.size(); i++) {
+			if(this.getTime().get(i) > time)
+				p= timePropotion( i-1, i, time);
+		}
+		
+		return p;
+	}
+	
+	private Point3D timePropotion(int p1, int p2,double  time)
+	{
+		double n = ((time-this.getTime().get(p1))/(this.getTime().get(p2)-this.getTime().get(p1)));
+		double dx = Math.abs(this.get(p2).x()-this.get(p1).x());
+		double dy = Math.abs(this.get(p2).y()-this.get(p1).y());
+		double x = this.get(p1).x() + dx*n;
+		double y =  this.get(p1).y() +dy*n;
+		
+		Point3D p =new Point3D( x,y,0);
+		return p;
+
+	}
+	
 
 	public String toString()
 	{
@@ -41,5 +76,14 @@ public class Path extends LinkedList<Point3D>{
 			str += "null";
 		}
 		return str;
+	}
+	
+	public String toStringTimes()
+	{
+		return this.getTime().toString();
+	}
+	
+	public ArrayList<Double> getTime() {
+		return times;
 	}
 }

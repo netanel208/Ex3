@@ -10,6 +10,9 @@ public class Packmen extends element{
 		speed = Double.parseDouble(line[5]);
 		radius = Double.parseDouble(line[6]);
 	}
+	public double getSpeed() {
+		return speed;
+	}
 	public Packmen(Packmen packmen)
 	{
 		super(packmen);

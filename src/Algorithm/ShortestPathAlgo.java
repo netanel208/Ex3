@@ -2,6 +2,7 @@ package Algorithm;
 
 import java.util.ArrayList;
 
+
 import Coords.MyCoords;
 import GIS.Fruit;
 import GIS.Game;
@@ -12,21 +13,26 @@ import Paths.Path;
 public class ShortestPathAlgo {
 
 	Game game;
+	Path[] path;
 	ArrayList<Fruit> _fruits;
 	ArrayList<Packmen> _packmens;
+	double totalTime;
 
-	public ShortestPathAlgo(String csvFileName)
+	public ShortestPathAlgo(Game game)
 	{
-		game = new Game(csvFileName);
+		this.game = game;
 		_fruits = game.getFruits();
 		_packmens = game.getPackmens();
-		theShortRoute();
+		path = new Path[_packmens.size()];
+		for(int i=0 ; i<path.length ; i++)
+		{
+			path[i] = new Path();
+		}
+		totalTime = 0;
 	}
 
-	private Path theShortRoute()
+	public Path[] theShortRoute()
 	{
-		Path path = new Path();
-
 		//copy
 		ArrayList<Fruit> rep_fruits = new ArrayList<Fruit>();
 		for(int  i=0 ; i<_fruits.size() ; i++)
@@ -39,35 +45,62 @@ public class ShortestPathAlgo {
 			rep_packmen.add(new Packmen(_packmens.get(i)));
 		}
 
-		
+
 		while(rep_fruits.size() != 0)
 		{
-			//calculate distance
-			MyCoords c = new MyCoords(); 
-			double minDistance = Integer.MAX_VALUE;
-			int index_fruit = 0;
-			for(int i=0 ; i<rep_fruits.size() ; i++)
-			{
-				double dis = c.distance3d((Point3D)_packmens.get(0).getGeom(),(Point3D)rep_fruits.get(i).getGeom());
-				if(minDistance > dis)
+
+			for (int i = 0; i < rep_packmen.size(); i++) {
+				Packmen _pac =rep_packmen.get(i);
+
+				//calculate distance
+				MyCoords c = new MyCoords(); 
+				double minTime = Integer.MAX_VALUE;
+				int index_fruit = 0;
+				for(int j=0 ; j<rep_fruits.size() ; j++)
 				{
-					minDistance = dis;
-					index_fruit = i;
+					double speed = _pac.getSpeed();
+					double dis = c.distance3d((Point3D)_pac.getGeom(),(Point3D)rep_fruits.get(j).getGeom());
+					double time = dis/speed;
+					if(minTime > time)
+					{
+						minTime = time;
+						index_fruit = j;
+					}
 				}
+
+				totalTime += minTime;
+				//move packmen
+				Point3D location = (Point3D)rep_fruits.get(index_fruit).getGeom();
+				_pac.setGeom(new Point3D(location));
+				path[i].add(new Point3D(location));
+				path[i].getTime().add(totalTime);
+				rep_fruits.remove(index_fruit);
 			}
-
-			//move packmen
-			Point3D location = (Point3D)rep_fruits.get(index_fruit).getGeom();
-			rep_packmen.get(0).setGeom(new Point3D(location));
-			path.add(new Point3D(location));
-			rep_fruits.remove(index_fruit);
 		}
-
 		return path;
 
 	}
+	
+	public String toString()
+	{
+		String str = "{ ";
+		for(int i=0 ; i<path.length ; i++)
+		{
+			str += path[i].toString()+"\n";
+		}
+		str += "}";
+		return str;
+	}
+	public double getTime()
+	{
+		return totalTime;
+	}
+	
 	public static void main(String[] args) {
-		ShortestPathAlgo s = new ShortestPathAlgo("E:\\שנה ב\\OOP\\מטלות\\מטלה 3\\Ex3_data\\data\\game_1543693822377.csv");
-		System.out.println(s.theShortRoute());
+		Game g = new Game("C:\\Users\\caron\\Desktop\\game_1543693822377.csv");
+		ShortestPathAlgo s = new ShortestPathAlgo(g);
+		Path[] _p = s.theShortRoute();
+		System.out.println(s);
+		System.out.println(_p[0].toStringTimes());
 	}
 }

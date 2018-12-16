@@ -16,6 +16,10 @@ public class MyCoords implements coords_converter{
 	 */
 	@Override
 	public Point3D add(Point3D gps, Point3D local_vector_in_meter) {
+		
+		if (!isValid_GPS_Point(gps) ) {
+			throw new RuntimeException("Error: Invalid gps point ");
+		}
 
 		double x =local_vector_in_meter.x();
 		double y =local_vector_in_meter.y();
@@ -52,6 +56,10 @@ public class MyCoords implements coords_converter{
 	 */
 	@Override
 	public double distance3d(Point3D gps0, Point3D gps1) {
+		
+		if (!isValid_GPS_Point(gps0) || !isValid_GPS_Point(gps1) ) {
+			throw new RuntimeException("Error: Invalid gps point ");
+		}
 
 		double diff_lat = gps1.x()-gps0.x();
 		double diff_lon = gps1.y()-gps0.y();
@@ -61,10 +69,8 @@ public class MyCoords implements coords_converter{
 
 		double lat_meter = toMeterLat(diff_lat_rad);
 		double lon_meter = toMeterLon(gps0,diff_lon_rad);
-		
-		double diff_alt =  gps1.z()-gps0.z();
 
-		double distance = Math.sqrt((lat_meter*lat_meter)+(lon_meter*lon_meter)+(diff_alt*diff_alt));
+		double distance = Math.sqrt((lat_meter*lat_meter)+(lon_meter*lon_meter));
 
 
 		return distance;
@@ -97,6 +103,9 @@ public class MyCoords implements coords_converter{
 	}
 
 	public Point3D toMeterGps(Point3D gps) {
+		if (!isValid_GPS_Point(gps)) {
+			throw new RuntimeException("Error: Invalid gps point ");
+		}
 		Point3D zero = new Point3D(0,0,0);
 		double x_rad = Math.toRadians(gps.x());
 		double y_rad = Math.toRadians(gps.y());
@@ -112,6 +121,10 @@ public class MyCoords implements coords_converter{
 	 */
 	@Override
 	public Point3D vector3D(Point3D gps0, Point3D gps1) {
+		
+		if (!isValid_GPS_Point(gps0) || !isValid_GPS_Point(gps1) ) {
+			throw new RuntimeException("Error: Invalid gps point ");
+		}
 
 		double diff_lat = gps1.x()-gps0.x();
 		double diff_lon = gps1.y()-gps0.y();
@@ -137,6 +150,11 @@ public class MyCoords implements coords_converter{
 
 	@Override
 	public double[] azimuth_elevation_dist(Point3D gps0, Point3D gps1) {
+		
+		if (!isValid_GPS_Point(gps0) || !isValid_GPS_Point(gps1) ) {
+			throw new RuntimeException("Error: Invalid gps point ");
+		}
+		
 		double[] arr = new double[3];
 
 		//distance
