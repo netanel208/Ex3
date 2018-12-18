@@ -11,6 +11,5 @@ import Geom.Point3D;
  */
 public interface GIS_element {
 	public Geom_element getGeom();
-//	public Meta_data getData();
 	public void translate(Point3D vec);
 }

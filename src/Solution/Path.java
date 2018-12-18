@@ -1,4 +1,4 @@
-package Paths;
+package Solution;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -40,8 +40,10 @@ public class Path extends LinkedList<Point3D>{
 		
 		// find the 2 point that the time betwen them 
 		for (int i = 0; i < this.size(); i++) {
-			if(this.getTime().get(i) > time)
-				p= timePropotion( i-1, i, time);
+			if(this.getTime().get(i) > time) {
+				return timePropotion( i-1, i, time);
+				
+			}
 		}
 		
 		return p;
@@ -50,8 +52,8 @@ public class Path extends LinkedList<Point3D>{
 	private Point3D timePropotion(int p1, int p2,double  time)
 	{
 		double n = ((time-this.getTime().get(p1))/(this.getTime().get(p2)-this.getTime().get(p1)));
-		double dx = Math.abs(this.get(p2).x()-this.get(p1).x());
-		double dy = Math.abs(this.get(p2).y()-this.get(p1).y());
+		double dx =this.get(p2).x()-this.get(p1).x();
+		double dy = this.get(p2).y()-this.get(p1).y();
 		double x = this.get(p1).x() + dx*n;
 		double y =  this.get(p1).y() +dy*n;
 		

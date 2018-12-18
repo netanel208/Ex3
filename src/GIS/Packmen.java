@@ -1,14 +1,20 @@
 package GIS;
 
+import java.util.ArrayList;
+
 public class Packmen extends element{
 
 	double speed;
 	double radius;
+//	ArrayList<Long> times;
+	
+	
 	public Packmen(String[] line)
 	{
 		super(line);
 		speed = Double.parseDouble(line[5]);
 		radius = Double.parseDouble(line[6]);
+//		times = new ArrayList<Long>();
 	}
 	public double getSpeed() {
 		return speed;
@@ -19,6 +25,10 @@ public class Packmen extends element{
 		this.speed = packmen.speed;
 		this.radius = packmen.radius;
 	}
+	
+//	public ArrayList<Long> getTimes() {
+//		return times;
+//	}
 	
 	public String toString()
 	{

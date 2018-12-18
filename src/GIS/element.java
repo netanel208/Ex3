@@ -45,12 +45,6 @@ public class element implements GIS_element {
 		return p;
 	}
 
-//	@Override
-//	public Meta_data getData() {
-//		Meta_data meta_data = new Meta_data_element()
-//		return null;
-//	}
-
 	@Override
 	public void translate(Point3D vec) {
 		MyCoords mc = new MyCoords(); 

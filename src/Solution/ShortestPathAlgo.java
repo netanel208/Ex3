@@ -1,4 +1,4 @@
-package Algorithm;
+package Solution;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ import GIS.Fruit;
 import GIS.Game;
 import GIS.Packmen;
 import Geom.Point3D;
-import Paths.Path;
+
 
 public class ShortestPathAlgo {
 
@@ -43,6 +43,10 @@ public class ShortestPathAlgo {
 		for(int  i=0 ; i<_packmens.size() ; i++)
 		{
 			rep_packmen.add(new Packmen(_packmens.get(i)));
+			Packmen _pac =rep_packmen.get(i);
+
+			path[i].add(new Point3D((Point3D)_pac.getGeom()));
+			path[i].getTime().add(0.0);
 		}
 
 
@@ -50,7 +54,7 @@ public class ShortestPathAlgo {
 		{
 
 			for (int i = 0; i < rep_packmen.size(); i++) {
-				Packmen _pac =rep_packmen.get(i);
+				Packmen _pac = rep_packmen.get(i);
 
 				//calculate distance
 				MyCoords c = new MyCoords(); 
@@ -68,19 +72,27 @@ public class ShortestPathAlgo {
 					}
 				}
 
-				totalTime += minTime;
-				//move packmen
-				Point3D location = (Point3D)rep_fruits.get(index_fruit).getGeom();
-				_pac.setGeom(new Point3D(location));
-				path[i].add(new Point3D(location));
-				path[i].getTime().add(totalTime);
-				rep_fruits.remove(index_fruit);
+				if(rep_fruits.size() != 0)
+				{
+					//move packmen
+					Point3D location = (Point3D)rep_fruits.get(index_fruit).getGeom();
+					_pac.setGeom(new Point3D(location));
+					path[i].add(new Point3D(location));
+					
+					//add to times of path
+					int size = path[i].getTime().size();
+					double prev_time = path[i].getTime().get(size-1);
+					path[i].getTime().add(prev_time+minTime);
+					
+					//remove fruit
+					rep_fruits.remove(index_fruit);
+				}
 			}
 		}
 		return path;
 
 	}
-	
+
 	public String toString()
 	{
 		String str = "{ ";
@@ -91,16 +103,19 @@ public class ShortestPathAlgo {
 		str += "}";
 		return str;
 	}
-	public double getTime()
+	public double getTotalTime()
 	{
+		double max = Double.MIN_VALUE;
+		for(int i=0 ; i<path.length ; i++)
+		{
+			int p_size = path[i].size();
+			double lastTime = path[i].getTime().get(p_size-1);//last time in path
+			if(lastTime > max)
+			{
+				max = lastTime; 
+			}
+		}
+		totalTime=max;
 		return totalTime;
-	}
-	
-	public static void main(String[] args) {
-		Game g = new Game("C:\\Users\\caron\\Desktop\\game_1543693822377.csv");
-		ShortestPathAlgo s = new ShortestPathAlgo(g);
-		Path[] _p = s.theShortRoute();
-		System.out.println(s);
-		System.out.println(_p[0].toStringTimes());
 	}
 }

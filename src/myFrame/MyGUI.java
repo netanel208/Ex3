@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Menu;
@@ -26,22 +27,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import Algorithm.ShortestPathAlgo;
 import File_format.Map;
 import GIS.Fruit;
 import GIS.Game;
 import GIS.Packmen;
 import Geom.Point3D;
-import Paths.Path;
+import Solution.Path;
+import Solution.ShortestPathAlgo;
 
 import javax.swing.JFileChooser;
 
-public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemListener, Runnable {
+public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemListener {
 
 
 	Image image;
 	Image packmenIcon;
-	Image fruitIcon;
+	//	Image fruitIcon;
 	MenuBar menuBar;
 	Menu elementItem;
 	Menu fileItem;
@@ -51,21 +52,25 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 	MenuItem addItem;
 	MenuItem saveItem;
 	MenuItem runProgramItem;
+	MenuItem kmlItem;
 	int x = -1;
 	int y = -1;
 	int width = -1;
 	int height = -1;
 	boolean fruit_addable = false;
 	boolean packmen_addable = false;
+	boolean runTheGame = false;//////////////
 	ArrayList<FruitLabel> fruitsLabels;
 	ArrayList<PacmanLabel> pacmansLabels;
+	Game game;           ///////////////
+	ShortestPathAlgo alg;//////////////
+	Path[] ans;          //////////////
 
-	////////
 	private JTextField filename = new JTextField();
 
 	final Point3D start = new Point3D(32.10571,35.20237,0);
 	final Point3D end = new Point3D(32.10189,35.21239,0);
-	//////////
+
 
 	private MyGUI()
 	{
@@ -77,7 +82,7 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 	{
 		image = Toolkit.getDefaultToolkit().getImage("Ariel1.png");
 		packmenIcon = Toolkit.getDefaultToolkit().getImage("pacman.png");
-		fruitIcon = Toolkit.getDefaultToolkit().getImage("fruit.png");
+		//		fruitIcon = Toolkit.getDefaultToolkit().getImage("fruit.png");
 		///////////
 		Container cp = getContentPane();
 		filename.setEditable(false);
@@ -100,6 +105,9 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		addItem = new MenuItem("Add Csv");
 		addItem.addActionListener(this);
 
+		kmlItem = new MenuItem("Convert to kml");
+		kmlItem.addActionListener(this);
+
 		saveItem = new MenuItem("Save");
 		saveItem.addActionListener(this);
 
@@ -109,6 +117,7 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		menuBar.add(fileItem);
 		fileItem.add(addItem);
 		fileItem.add(saveItem);
+		fileItem.add(kmlItem);
 
 		menuBar.add(elementItem);
 		elementItem.add(packmenItem);
@@ -126,16 +135,14 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		height = this.getHeight();
 
 	}
+
 	public void paint(Graphics g){
-		int w = this.getWidth();
-		int h = this.getHeight();
-		g.drawImage(image, 0, 0, w, h, this);
+		width = this.getWidth(); ///////
+		height = this.getHeight();////////
+		g.drawImage(image, 0, 0, width, height, this);
 		g.setColor(Color.YELLOW);
-		String s = " ["+w+","+h+"]";
-		g.drawString(s, w/3, h/2);
-		System.out.println("size fruits ="+fruitsLabels.size());
-		System.out.println("new width = "+w);
-		System.out.println("old width = "+ width);
+		String s = " ["+width+","+height+"]";
+		g.drawString(s, width/3, height/2);
 		if(!fruitsLabels.isEmpty())
 		{
 			for(int i=0 ; i<fruitsLabels.size() ; i++)
@@ -143,11 +150,11 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 				FruitLabel fruit = fruitsLabels.get(i);
 				int x_fruit = fruitsLabels.get(i).getX();
 				int y_fruit = fruitsLabels.get(i).getY();
-				x_fruit = (int)(((double)w)*((double)fruit.x_factor));
-				y_fruit = (int)(((double)h)*((double)fruit.y_factor));
-				System.out.println("fruit (X,Y)= "+"("+x_fruit+","+y_fruit+")");
+				x_fruit = (int)(((double)width)*((double)fruit.x_factor));
+				y_fruit = (int)(((double)height)*((double)fruit.y_factor));
 				fruit.setLocation(x_fruit, y_fruit);
-				g.drawImage(fruitIcon,x_fruit, y_fruit, 25, 25,this);
+				g.setColor(Color.WHITE);
+				g.fillOval(x_fruit, y_fruit, 15, 15);
 			}
 		}
 		if(!pacmansLabels.isEmpty())
@@ -157,14 +164,13 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 				PacmanLabel pacman = pacmansLabels.get(i);
 				int x_pacman = pacmansLabels.get(i).getX();
 				int y_pacman = pacmansLabels.get(i).getY();
-				System.out.println("1)pacman (X,Y)= "+"("+x_pacman+","+y_pacman+")");
-				x_pacman = (int)(((double)w)*((double)pacman.x_factor));
-				y_pacman = (int)(((double)h)*((double)pacman.y_factor));
+				x_pacman = (int)(((double)width)*((double)pacman.x_factor));
+				y_pacman = (int)(((double)height)*((double)pacman.y_factor));
 				pacman.setLocation(x_pacman, y_pacman);
-				System.out.println("2)pacman (X,Y)= "+"("+x_pacman+","+y_pacman+")");
 				g.drawImage(packmenIcon,x_pacman, y_pacman, 25, 25,this);
 			}
 		}
+
 	}
 
 	@Override
@@ -208,8 +214,19 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 				filename.setText("You pressed cancel");
 			}	
 		}
+
+		if(event.getSource().equals(kmlItem)) {
+
+		}
+
 		if(event.getSource().equals(runProgramItem))
 		{
+			runTheGame = true;
+			alg = new ShortestPathAlgo(game);////////
+			ans = alg.theShortRoute();       ////////
+			System.out.println(alg.toString());
+			System.out.println(ans[0].toStringTimes());
+
 			runGame();
 		}
 	}
@@ -223,7 +240,7 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		if(fruit_addable)
 		{
 			fruitsLabels.add(new FruitLabel(this.getWidth(), this.getHeight(), x, y));
-			System.out.println("location = "+fruitsLabels.get(fruitsLabels.size()-1).getLocation());
+			//			System.out.println("location = "+fruitsLabels.get(fruitsLabels.size()-1).getLocation());
 		}
 		if(packmen_addable)
 		{ 
@@ -263,7 +280,7 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	class FruitLabel extends JLabel{
+	class FruitLabel extends JComponent{
 
 		double x_factor;
 		double y_factor;
@@ -276,7 +293,7 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		}
 	}
 
-	class PacmanLabel extends JLabel{
+	class PacmanLabel extends JComponent{
 
 		double x_factor;
 		double y_factor;
@@ -285,23 +302,23 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 		{
 			move(x, y,width, height);
 		}
-		
+
 		public void move(int x, int y, int width, int height) {
 			this.setLocation(x, y);
 			x_factor = ((double)this.getX())/((double)width);
 			y_factor = ((double)this.getY())/((double)height);
-			
+
 		}
 	}
 	private void LoadGame(String diraction) {
 
 		int Width =this.getWidth();
 		int Height= this.getHeight();
-		Game g = new Game(diraction);
+		game = new Game(diraction);
 		Map m = new Map(image,Width,Height,start,end);
 
-		ArrayList<Fruit> fruits = g.getFruits();
-		ArrayList<Packmen> pacmans = g.getPackmens();
+		ArrayList<Fruit> fruits = game.getFruits();
+		ArrayList<Packmen> pacmans = game.getPackmens();
 
 		for (int i = 0; i < fruits.size(); i++) {
 			Point3D pointGps = (Point3D) fruits.get(i).getGeom();
@@ -352,93 +369,47 @@ public class MyGUI extends JFrame implements MouseListener,ActionListener,ItemLi
 			pacmans.add(new Packmen(lineP));
 		}
 
-		Game game = new Game(pacmans ,fruits);//create output.csv
+		game = new Game(pacmans ,fruits);//override old object and create output.csv
 		return game;
 	}
 	private void runGame()
 	{
-		this.run();
-
-		//		int Width =this.getWidth();
-		//		int Height= this.getHeight();
-		//		Game game = createGame(); 
-		//		ShortestPathAlgo alg = new ShortestPathAlgo(game);
-		//		Path[] ans = alg.theShortRoute();
-		//		RunGame r = new RunGame(ans,Width,Height);
-		//		r.run();
+		runTheGame = true;
+		Thread th = new Thread(new Runnable() {
+			public void run() {
+				runAlgo();
+			}
+		});
+		th.start();
 	}
 
-	@Override
-	public void run() {
 
-		int Width =this.getWidth();
-		int Height= this.getHeight();
-		Game game = createGame(); 
-		ShortestPathAlgo alg = new ShortestPathAlgo(game);
-		Path[] ans = alg.theShortRoute();
-		System.out.println(ans[0]);
-		System.out.println(ans[0].toStringTimes());
+	public void runAlgo() {
 
 		System.out.println("run started");
-		Map m = new Map(image,Width,Height,start,end);
+		Map m = new Map(image,width,height,start,end);
 		double timer = 0;
+		double totalTime = alg.getTotalTime();
 
-		while(timer <= ans[0].getTime().get(ans[0].size()-1))
+
+		while(timer <= totalTime)
 		{
-			timer += 10;
-			Point3D pointGps = ans[0].getPointInTime(timer);
-			System.out.println("the current point is"+pointGps);
-			Point3D pointPixel = m.toPixel(pointGps);
-			System.out.println("the current point in pixel is"+pointPixel);
-			pacmansLabels.get(0).move((int)pointPixel.x(), (int)pointPixel.y(), Width, Height);;
-			repaint();
+			timer += 5;
+			for(int i=0 ; i<ans.length ; i++)
+			{
+				Point3D pointGps = ans[i].getPointInTime(timer);
+				//			System.out.println("the current point is"+pointGps);
+				Point3D pointPixel = m.toPixel(pointGps);
+				//			System.out.println("the current point in pixel is"+pointPixel);
+				pacmansLabels.get(i).move((int)pointPixel.x(), (int)pointPixel.y(), width, height);
+				repaint();
+			}
 			try {
-				Thread.sleep(200);					
+				Thread.sleep(100);					
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-
 		}
 	}
-
-
-//	class RunGame implements Runnable{
-//
-//		Path[] paths ;
-//		int w;
-//		int h;
-//		public RunGame(Path[] p, int w, int h)
-//		{
-//			this.paths = p;
-//			this.w = w;
-//			this.h = h;
-//		}
-//		@Override
-//		public void run() {
-//			System.out.println("run started");
-//			Map m = new Map(image,this.w,this.h,start,end);
-//			double timer = 0;
-//
-//			while(timer <= paths[0].getTime().get(paths[0].size()-1))
-//			{
-//				timer += 10;
-//				Point3D pointGps = paths[0].getPointInTime(timer);
-//				System.out.println("the current point is"+pointGps);
-//				Point3D pointPixel = m.toPixel(pointGps);
-//				System.out.println("the current point in pixel is"+pointPixel);
-//				pacmansLabels.get(0).setLocation(pointPixel.ix(), pointPixel.iy());
-//				try {
-//					Thread.currentThread().sleep(200);					
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				repaint();
-//
-//			}
-//		}
-//	}
-
 }
