@@ -7,12 +7,22 @@ import java.util.ArrayList;
 
 import File_format.CsvArrayList;
 
+/**
+ * This class represent a Game that include fruits and pacmans, each one of them contains GPS data.
+ * @author Netanel
+ * @author Carmel
+ *
+ */
 public class Game {
 
 	CsvArrayList cal;
 	ArrayList<Packmen> packmens;
 	ArrayList<Fruit> fruits;
 	
+	/**
+	 * This constructor accept csv file name and convert it to collections of pacmans and fruit
+	 * @param csvFileName
+	 */
 	public Game(String csvFileName) {
 		cal = new CsvArrayList(csvFileName); 
 		packmens = new ArrayList<Packmen>();
@@ -20,6 +30,11 @@ public class Game {
 		createCollections(cal.getLines());
 	}
 
+	/**
+	 * This constructor accept collections of pacmans and fruits and convert its to csv file(output.csv)
+	 * @param packmens
+	 * @param fruits
+	 */
 	public Game(ArrayList<Packmen> packmens, ArrayList<Fruit> fruits)
 	{
 		this.packmens = packmens;
@@ -27,13 +42,16 @@ public class Game {
 		createCsv();
 	}
 	
+	/**
+	 * This method create csv file from this fruits and pacmans collections.
+	 */
 	public void createCsv()
 	{
 		String fileName = "output.csv";
 		PrintWriter pw = null;
 		try 
 		{
-			pw = new PrintWriter(new File(fileName));
+			pw = new PrintWriter(new File(fileName));//create new file with name: "output.csv"
 		} 
 		catch (FileNotFoundException e) 
 		{
@@ -42,11 +60,16 @@ public class Game {
 		}
 		StringBuilder sb = new StringBuilder();
 		
+		//the first line in csv file(titels)
 		sb.append("Type,id,Lat,Lon,Alt,Speed/Weight,Radius,"+packmens.size()+","+fruits.size()+"\n");
+		
+		//after write titels write the pacmans details
 		for(int i=0 ; i<packmens.size() ; i++)
 		{
 			sb.append(packmens.get(i).toString()+"\n");
 		}
+		
+		//after write pacmans details write the fruits details
 		for(int i=0 ; i<fruits.size() ; i++)
 		{
 			sb.append(fruits.get(i).toString()+"\n");
@@ -54,18 +77,13 @@ public class Game {
 		
 		pw.write(sb.toString());
 		pw.close();
-		System.out.println("done!");
 	}
 	
-	public ArrayList<Packmen> getPackmens() {
-		return packmens;
-	}
-
-	public ArrayList<Fruit> getFruits() {
-		return fruits;
-	}
-	
-	private void createCollections(ArrayList<String[]> lines)
+	/**
+	 * This method accept ArrayList<String[]> and create from it collections of fruits and pacmans
+	 * @param lines
+	 */
+	public void createCollections(ArrayList<String[]> lines)
 	{
 		for(int i=0 ; i<lines.size() ; i++)
 		{
@@ -81,8 +99,18 @@ public class Game {
 			}
 		}
 	}
-	public static void main(String[] args) {
-		Game g = new Game("E:\\שנה ב\\OOP\\מטלות\\מטלה 3\\Ex3_data\\data\\game_1543684662657.csv");
-		g.createCsv();
+	
+	/**
+	 * @return ArrayList<Packmen>
+	 */
+	public ArrayList<Packmen> getPackmens() {
+		return packmens;
+	}
+
+	/**
+	 * @return ArrayList<Fruit>
+	 */
+	public ArrayList<Fruit> getFruits() {
+		return fruits;
 	}
 }

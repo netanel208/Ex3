@@ -12,7 +12,14 @@ import javax.imageio.ImageIO;
 import Coords.MyCoords;
 import Geom.Point3D;
 
-
+/**
+ * This class  represents a map and have the ability to convert image map from pixel
+ * to gps coordinate and back to gps
+ * This class also have methods for calculate distance and the azimuth between 2 point in pixel
+ * @author Carmel
+ * @author Netanel
+ * In this class we use this code : https://stackoverflow.com/questions/38748832/convert-longitude-and-latitude-coordinates-to-image-of-a-map-pixels-x-and-y-coor
+ */
 public class Map {
 
 	Image  map;
@@ -20,9 +27,16 @@ public class Map {
 	Point3D start, end;
 	boolean increaseLon, increaseLat;
 	double mapLon, mapLat;
+	MyCoords c;
 	
-	
-
+/**
+ * This constactur build a map 
+ * @param imageName
+ * @param w Width
+ * @param h Height
+ * @param start point of the image in the top left corner
+ * @param end point of the image in the lower right corner
+ */
 	public Map (Image imageName,int w, int h, Point3D start,Point3D end ) {
 
 		map = imageName;
@@ -34,16 +48,15 @@ public class Map {
 		increaseLon = isIncrease(start.y(),end.y());
 		mapLon = Math.abs(start.x()-end.x());
 		mapLat = Math.abs(start.y()-end.y());
-		
-		System.out.println("map"+mapWidth+"//"+mapHeight);
+		c = new MyCoords(); 
 
 	}
 	
 /**
- * 
- * @param start
- * @param end
- * @return
+ * This method check if the map coordinates are increase or decrease
+ * @param @param start point of the image in the top left corner
+ * @param end point of the image in the lower right corner
+ * @return true if the map coordinates are increase
  */
 	private boolean isIncrease (double start, double end) {
 		if ( start-end > 0)
@@ -55,9 +68,9 @@ public class Map {
 
 
 /**
- * 
- * @param p
- * @return
+ * This method convert from gps coordinate to pixel point
+ * @param p point in gps coordinate
+ * @return pixel point
  */
 
 	public  Point3D toPixel(Point3D p){
@@ -85,9 +98,9 @@ public class Map {
 	}
 
 /**
- * 
- * @param p
- * @return
+ *  This method convert from pixel point to gps point  
+ * @param p point in pixel
+ * @return  gps point
  */
 	public Point3D toGPS(Point3D p){
 		
@@ -120,10 +133,10 @@ public class Map {
 	}
 	
 	/**
-	 * 
+	 * This method calculate the distance between 2 pixel points
 	 * @param p0
 	 * @param p1
-	 * @return
+	 * @return distance between 2 pixel points 
 	 */
 	public double distance (Point3D p0, Point3D p1) {
 		
@@ -132,23 +145,21 @@ public class Map {
 		Point3D gps0 =  toGPS(p0);
 		Point3D gps1 = toGPS(p1);
 		
-		MyCoords c = new MyCoords(); 
 		ans = c.distance3d(gps0,gps1);
 		return ans;
 	}
 	
 	/**
-	 * 
+	 * This method calculate the azimuth between 2 pixel points
 	 * @param p0
 	 * @param p1
-	 * @return
+	 * @return the azimuth between 2 pixel points
 	 */
 	public double azimuth (Point3D p0, Point3D p1 ) {
 		double ans;
 		
 		Point3D gps0 =  toGPS(p0);
 		Point3D gps1 = toGPS(p1);
-		MyCoords c = new MyCoords(); 
 		ans = (c.azimuth_elevation_dist(gps0, gps1))[0];
 		
 		return ans;

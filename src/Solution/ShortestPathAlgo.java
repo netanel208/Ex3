@@ -9,7 +9,14 @@ import GIS.Game;
 import GIS.Packmen;
 import Geom.Point3D;
 
-
+/**
+ * This class provides a tool whose main function is to calculate the short path for each Pacman in the game.
+ * An object from this class contains information about the algorithm and other data provided by the algorithm
+ * such as: a collection of tracks for the Pacmans, the total time of the game .
+ * @author Netanel
+ * @author Carmel
+ *
+ */
 public class ShortestPathAlgo {
 
 	Game game;
@@ -18,6 +25,10 @@ public class ShortestPathAlgo {
 	ArrayList<Packmen> _packmens;
 	double totalTime;
 
+	/**
+	 * This constructor initialize the variables of This 
+	 * @param game
+	 */
 	public ShortestPathAlgo(Game game)
 	{
 		this.game = game;
@@ -31,6 +42,10 @@ public class ShortestPathAlgo {
 		totalTime = 0;
 	}
 
+	/**
+	 * This method calculate the short path for each Pacman by specific algorithm.
+	 * @return Path[] - A collection of tracks for all the Pacmans.
+	 */
 	public Path[] theShortRoute()
 	{
 		//copy
@@ -46,7 +61,7 @@ public class ShortestPathAlgo {
 			Packmen _pac =rep_packmen.get(i);
 
 			path[i].add(new Point3D((Point3D)_pac.getGeom()));
-			path[i].getTime().add(0.0);
+			path[i].getTimes().add(0.0);
 		}
 
 
@@ -65,7 +80,7 @@ public class ShortestPathAlgo {
 					double speed = _pac.getSpeed();
 					double dis = c.distance3d((Point3D)_pac.getGeom(),(Point3D)rep_fruits.get(j).getGeom());
 					double time = dis/speed;
-					if(minTime > time)
+					if(minTime > time)//find the min time of fruit from pacman
 					{
 						minTime = time;
 						index_fruit = j;
@@ -80,9 +95,18 @@ public class ShortestPathAlgo {
 					path[i].add(new Point3D(location));
 					
 					//add to times of path
-					int size = path[i].getTime().size();
-					double prev_time = path[i].getTime().get(size-1);
-					path[i].getTime().add(prev_time+minTime);
+					int size = path[i].getTimes().size();
+					double prev_time = path[i].getTimes().get(size-1);
+					double cuurentTime =prev_time+minTime;
+					path[i].getTimes().add(cuurentTime);
+					 
+					int id =rep_fruits.get(index_fruit).getId();
+					
+					for(int  k=0 ; k<_fruits.size() ; k++) // the orignal fruit
+					{
+						if (_fruits.get(k).getId()==id)
+							_fruits.get(k).setTime((long)cuurentTime); 
+					}
 					
 					//remove fruit
 					rep_fruits.remove(index_fruit);
@@ -93,6 +117,9 @@ public class ShortestPathAlgo {
 
 	}
 
+	/**
+	 * 
+	 */
 	public String toString()
 	{
 		String str = "{ ";
@@ -103,13 +130,18 @@ public class ShortestPathAlgo {
 		str += "}";
 		return str;
 	}
+	
+	/**
+	 * This method get the total time of algorithm
+	 * @return Total time of the algorithm
+	 */
 	public double getTotalTime()
 	{
 		double max = Double.MIN_VALUE;
 		for(int i=0 ; i<path.length ; i++)
 		{
 			int p_size = path[i].size();
-			double lastTime = path[i].getTime().get(p_size-1);//last time in path
+			double lastTime = path[i].getTimes().get(p_size-1);//last time in path
 			if(lastTime > max)
 			{
 				max = lastTime; 
