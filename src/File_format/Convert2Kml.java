@@ -64,11 +64,9 @@ public class Convert2Kml {
 
 			// get the id 
 			String id = Integer.toString(f.getId());
-			System.out.println("id"+id);
 
 			// Convert from long to String
 			long t = f.getTime()*1000; //time of fruit is in second
-			System.out.println("time"+t);
 			SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSXXX");
 			String dateString = formatter.format(new Date(t));
 
